@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "D:/Estudio/Seminario/Programa/MicroPython/8Queens"
+		}
+	],
+	"settings": {
+		"debug.openDebug": "neverOpen",
+		"python.languageServer": "None"
+	}
+}
