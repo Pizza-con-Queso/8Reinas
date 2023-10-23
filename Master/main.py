@@ -26,6 +26,7 @@ ev3 = EV3Brick()
 server = BluetoothMailboxServer()
 
 server.wait_for_connection(2)
+# server.wait_for_connection()
 
 mbox1 = TextMailbox('greeting1', server)
 mbox2 = TextMailbox('greeting2', server)
@@ -37,17 +38,16 @@ print('connected!')
 # and then sends a reply.
 i = 0
 while True:
-    mbox1.wait()
-    mensaje_recibido_cli = mbox1.read()
-    # print(mensaje_recibido_cli)
-    pantalla(mensaje_recibido_cli, i)
-    mbox1.send('Soy R1!__')
+    print("en el while")
     
-    mbox2.wait()
-    mensaje_recibido_cli = mbox2.read()
-    # print(mensaje_recibido_cli)
-    pantalla(mensaje_recibido_cli, i)
-    mbox2.send('hello to you!__')
+    if mbox1.read():
+        mensaje_recibido_cli1 = mbox1.read()
+        pantalla(mensaje_recibido_cli1, i)
+        mbox1.send('Soy R1!__')
+    
+    if mbox2.read():
+        mensaje_recibido_cli2 = mbox2.read()
+        pantalla(mensaje_recibido_cli2, i)
+        mbox2.send('hello!__')
     
     i += 1
-    

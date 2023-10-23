@@ -28,17 +28,18 @@ def pantalla(mensaje_coso, i):
 SERVER = 'reina1'
 
 client = BluetoothMailboxClient()
-mbox = TextMailbox('greeting1', client)
+client.connect(SERVER)
+mbox = TextMailbox('greeting2', client)
 
 print('establishing connection...')
-client.connect(SERVER)
 print('connected!')
 
 # In this program, the client sends the first message and then waits for the
 # server to reply.
 i = 0
 while True:
-    mbox.send('Soy R2!___')
+    print("Estamos en el while")
+    mbox.send('Soy R3!___')
     mbox.wait()
     mensaje = mbox.read()
     # print(mbox.read())
