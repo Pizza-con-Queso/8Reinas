@@ -1,11 +1,4 @@
 #!/usr/bin/env pybricks-micropython
-
-# Before running this program, make sure the client and server EV3 bricks are
-# paired using Bluetooth, but do NOT connect them. The program will take care
-# of establishing the connection.
-
-# The server must be started before the client!
-
 from pybricks.messaging import BluetoothMailboxServer, TextMailbox
 from pybricks.hubs import EV3Brick
 from pybricks.tools import wait
@@ -28,14 +21,12 @@ server = BluetoothMailboxServer()
 server.wait_for_connection(2)
 # server.wait_for_connection()
 
-mbox1 = TextMailbox('greeting1', server)
-mbox2 = TextMailbox('greeting2', server)
+mbox1 = TextMailbox('reina2', server)
+mbox2 = TextMailbox('reina3', server)
 # The server must be started before the client!
 print('waiting for connection...')
 print('connected!')
 
-# In this program, the server waits for the client to send the first message
-# and then sends a reply.
 i = 0
 while True:
     print("en el while")
@@ -43,11 +34,11 @@ while True:
     if mbox1.read():
         mensaje_recibido_cli1 = mbox1.read()
         pantalla(mensaje_recibido_cli1, i)
-        mbox1.send('Soy R1!__')
+        mbox1.send('300')
     
     if mbox2.read():
         mensaje_recibido_cli2 = mbox2.read()
         pantalla(mensaje_recibido_cli2, i)
-        mbox2.send('hello!__')
+        mbox2.send('400')
     
     i += 1
