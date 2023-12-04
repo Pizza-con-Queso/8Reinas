@@ -1,5 +1,5 @@
 #!/usr/bin/env pybricks-micropython
-from pybricks.messaging import BluetoothMailboxServer, TextMailbox
+from pybricks.messaging import BluetoothMailboxServer, BluetoothMailboxClient, TextMailbox
 from pybricks.hubs import EV3Brick
 from pybricks.tools import wait
 # from pybricks.hubs import PrimeHub
@@ -17,9 +17,9 @@ from pybricks.tools import wait
                                     anteriormente. No incluye la posición de whoiam.
 ---------------------------------------------------------------------------------------------------------------
 '''
-whoiam = 2
-posicion_actual = 7
-posiciones_otras_reinas = [] # [número del robot, número de la posición]
+
+posicion_actual = 0
+posiciones_otras_reinas = [] # Input: [número del robot, número de la posición]
 posiciones_total = []
 
 '''
@@ -55,6 +55,26 @@ def moverse_posicion(posicion, posicion_actual):
 
 
 '''
+Función de nombre del robot
+'''
+
+def nombre():
+    try:
+            with open('/etc/hostname') as file:
+                lines = file.readlines()
+                for line in lines:
+                    if line.startswith('reina'):
+                        name = line.split()
+    except Exception as e:
+        print(str(e))
+        
+    return name[0]
+
+
+
+whoiam = int(nombre()[5])
+
+'''
 ---------------------------------------------------------------------------------------------------------------
         Función que calcula las posibles posiciones disponibles respecto a las reinas anteriores a la propia, 
         sólo opera cuando es la reina a la que le corresponde avanzar. Retorna las posiciones que no generan 
@@ -68,16 +88,17 @@ def calcular_posicion_anterior(posiciones, whoiam):
     mis_posiciones_disponibles = []
     
     if whoiam == len(posiciones) + 1:
-        # print("Pasamos el if")
+        print("Pasamos el if")
         if len(posiciones) == 0:
-            for i in range(1,9):
+            for i in range(1,5):
                 mis_posiciones_disponibles.append([1, i])
             return mis_posiciones_disponibles
         for i in range(len(posiciones)):
-            for j in range(1, 9):
+            for j in range(1, 5):
                 if calcular_pendiente(posiciones[i][0], posiciones[i][1], whoiam, j):
-                    # print("Posible posición respecto a la reina", posiciones[i][0], "Posición:", j)
+                    print("Posible posición respecto a la reina", posiciones[i][0], "Posición:", j)
                     mis_posiciones_disponibles.append([whoiam, j])
+        print(mis_posiciones_disponibles)
         mis_posiciones_disponibles = depurar(mis_posiciones_disponibles, len(posiciones))
         print(mis_posiciones_disponibles)
         
@@ -182,15 +203,51 @@ def depurar_ingreso_blue(mensaje, whoiam):
         Forma de llamar a las funciones.
 ---------------------------------------------------------------------------------------------------------------
 '''
-depurar_ingreso_blue('R1P3', whoiam)
-print(posiciones_otras_reinas)
-print(posiciones_total)
-posiciones_temporal = calcular_posicion_anterior(posiciones_otras_reinas, whoiam)
-print(posiciones_temporal)
-if posiciones_temporal:
-    posiciones_respecto_actual(posiciones_temporal, posicion_actual)
+
+# depurar_ingreso_blue('R1P1', whoiam)
+# depurar_ingreso_blue('R2P4', whoiam)
+# print(posiciones_otras_reinas)
+# print(posiciones_total)
+# posiciones_temporal = calcular_posicion_anterior(posiciones_otras_reinas, whoiam)
+# print(posiciones_temporal)
+# if posiciones_temporal:
+#     posiciones_respecto_actual(posiciones_temporal, posicion_actual)
+
+# ev3 = EV3Brick()
 
 
+if whoiam == 1:
+    server = BluetoothMailboxServer()
+    server.wait_for_connection(1)
+    #mbox1 = TextMailbox('reina2', server)
+    mbox2 = TextMailbox('reina3', server)
+    #mbox3 = TextMailbox('reina4', server)
+    while True:
+        # avanzar, sugerencia el robot principal tiene todas las posiciones disponibles por lo que tendria que avanzar de posicion en posicion hasta el final
+        # if mbox1.read():
+        #     send("hola")
+        #     mbox1.send("R"+ str(whoiam) + "P" + str(posicion_actual))
+        #     pass
+        if mbox2.read():
+            
+            mbox2.send("hola")
+            pass
+        # if mbox3.read():
+        #     pass
+
+            
+    
+else:
+    SERVER = 'reina1'
+    client = BluetoothMailboxClient()
+    client.connect(SERVER)
+    mbox = TextMailbox(nombre(), client)
+    while True:
+        mbox.send(nombre())
+        mbox.wait()
+        mensaje = mbox.read()
+        print(mensaje)
+    
 
 def pantalla(mensaje_coso, i):
     # Mensaje que deseas mostrar en la pantalla
