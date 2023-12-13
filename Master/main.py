@@ -1,8 +1,19 @@
 #!/usr/bin/env pybricks-micropython
+
+'''
+---------------------------------------------------------------------------------------------------------------
+Autores: Alberto Gonzalez, Verónica Nizza
+
+Fecha: 11-12-2023
+
+Código: Backtraking para robots EV3
+---------------------------------------------------------------------------------------------------------------
+'''
+
+
 from pybricks.messaging import BluetoothMailboxServer, BluetoothMailboxClient, TextMailbox
 from pybricks.hubs import EV3Brick
 from pybricks.tools import wait
-# from pybricks.hubs import PrimeHub
 
 
 '''
@@ -22,6 +33,19 @@ posicion_actual = 0
 posiciones_otras_reinas = [] # Input: [número del robot, número de la posición]
 posiciones_total = []
 
+
+def pantalla(mensaje_coso, i):
+    ev3 = EV3Brick
+    # Mensaje que deseas mostrar en la pantalla
+    mensaje = mensaje_coso + str(i)
+
+    # Muestra el mensaje en la pantalla
+    ev3.screen.print(mensaje)
+    wait(5000)
+    # Limpia la pantalla
+    ev3.screen.clear()
+
+
 '''
 ---------------------------------------------------------------------------------------------------------------
         Función que permite determinar la distancia que debe moverse el robot por cada uno de los resultados.
@@ -32,27 +56,26 @@ posiciones_total = []
 ---------------------------------------------------------------------------------------------------------------
 '''
 def moverse_posicion(posicion, posicion_actual):
+    # ev3 = EV3Brick()
+    # motor_izquierdo = Motor(Port.B)
+    # motor_derecho = Motor(Port.C)
 
-    ev3 = EV3Brick()
-    ev3.speaker.beep()
+    # robot = DriveBase(motor_izquierdo, motor_derecho, wheel_diameter=55, axle_track=104)
+    
     if posicion == posicion_actual:
         print("Nos quedamos en el lugar")
-        # hub.speaker.beep()   
-        ev3.speaker.beep()
+        pantalla("Nos quedamos en el lugar", 1)
         return True
     elif posicion == 0:
         distancia = posicion - posicion_actual
         print("Volvemos a la posición inicial, retrocedemos:", distancia, "distancia")
-        ev3.speaker.beep()
-        # ev3.speaker.beep()
-        
+        # robot.straight(distancia*200)
+        pantalla("Nos ubicamos:" + str(posicion), 1)
     else:
         distancia = posicion - posicion_actual
         print("Avanzamos:", distancia, "distancia")
-        ev3.speaker.beep()
-        # ev3.speaker.beep()
-        # ev3.speaker.beep()   
-
+        pantalla("Nos ubicamos:" + str(posicion), 1)
+        # robot.straight(distancia*200)
 
 '''
 Función de nombre del robot
@@ -88,7 +111,7 @@ def calcular_posicion_anterior(posiciones, whoiam):
     mis_posiciones_disponibles = []
     
     if whoiam == len(posiciones) + 1:
-        print("Pasamos el if")
+        # print("Pasamos el if")
         if len(posiciones) == 0:
             for i in range(1,5):
                 mis_posiciones_disponibles.append([1, i])
@@ -96,7 +119,7 @@ def calcular_posicion_anterior(posiciones, whoiam):
         for i in range(len(posiciones)):
             for j in range(1, 5):
                 if calcular_pendiente(posiciones[i][0], posiciones[i][1], whoiam, j):
-                    print("Posible posición respecto a la reina", posiciones[i][0], "Posición:", j)
+                    # print("Posible posición respecto a la reina", posiciones[i][0], "Posición:", j)
                     mis_posiciones_disponibles.append([whoiam, j])
         print(mis_posiciones_disponibles)
         mis_posiciones_disponibles = depurar(mis_posiciones_disponibles, len(posiciones))
@@ -109,14 +132,16 @@ def calcular_posicion_anterior(posiciones, whoiam):
 '''
 ---------------------------------------------------------------------------------------------------------------
         Función que calcula las posibles posiciones respecto a las reinas anteriores a la propia, sólo opera
-        cuando es la reina a la que le corresponde avanzar.
+        cuando es la reina a la que le corresponde avanzar. Avanza únicamente cuando ya tiene calculadas las
+        posibles posiciones y actua en consecuencia según la situación de LA REINA (donde está y las demás)
+        cuando falla esa posición.
 
         posiciones:         lista de listas de las posiciones de las otras reinas. Ej: [[1,1], [2,3]]
         whoiam:             número propio de la reina.
 ---------------------------------------------------------------------------------------------------------------
 '''
 def posiciones_respecto_actual(disponibles, posicion_actual):
-    # global posicion_actual
+    
     if posicion_actual == 0:
         # MOVERSE ANTES DE CAMBIAR LA POSICIÓN ANTERIOR
         moverse_posicion(disponibles[0][1], posicion_actual)
@@ -247,18 +272,7 @@ else:
         mbox.wait()
         mensaje = mbox.read()
         print(mensaje)
-    
-
-def pantalla(mensaje_coso, i):
-    # Mensaje que deseas mostrar en la pantalla
-    mensaje = mensaje_coso + str(i)
-
-    # Muestra el mensaje en la pantalla
-    ev3.screen.print(mensaje)
-    wait(5000)
-    # Limpia la pantalla
-    ev3.screen.clear()
-    
+        
     
 # Inicializa el ladrillo EV3
 # ev3 = EV3Brick()

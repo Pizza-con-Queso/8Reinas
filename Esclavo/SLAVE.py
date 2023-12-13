@@ -1,23 +1,12 @@
 #!/usr/bin/env pybricks-micropython
-
-'''
----------------------------------------------------------------------------------------------------------------
-
-Autores: Alberto Gonzalez, Verónica Nizza
-
-Fecha: 11-12-2023
-
-Código: Backtraking para robots EV3
----------------------------------------------------------------------------------------------------------------
-'''
-
-from pybricks.messaging import BluetoothMailboxClient, TextMailbox
+from pybricks.messaging import BluetoothMailboxServer, BluetoothMailboxClient, TextMailbox
 from pybricks.hubs import EV3Brick
 from pybricks.tools import wait
-# from pybricks.hubs import EV3Brick
-from pybricks.ev3devices import Motor
+from pybricks.parameters import Port, Stop, Direction, Button, Color
+from pybricks.tools import wait, StopWatch, DataLog
 from pybricks.robotics import DriveBase
-from pybricks.parameters import Port
+
+# from pybricks.hubs import PrimeHub
 
 
 '''
@@ -32,11 +21,11 @@ from pybricks.parameters import Port
                                     anteriormente. No incluye la posición de whoiam.
 ---------------------------------------------------------------------------------------------------------------
 '''
-whoiam = 4
-posicion_actual = 5
-posiciones_otras_reinas = [] # número del robot, número de la posición
 
-
+posicion_actual = 0
+posiciones_otras_reinas = [] # Input: [número del robot, número de la posición]
+posiciones_total = []
+posiciones_disp = []
 '''
 ---------------------------------------------------------------------------------------------------------------
         Función que permite determinar la distancia que debe moverse el robot por cada uno de los resultados.
@@ -47,24 +36,47 @@ posiciones_otras_reinas = [] # número del robot, número de la posición
 ---------------------------------------------------------------------------------------------------------------
 '''
 def moverse_posicion(posicion, posicion_actual):
-    ev3 = EV3Brick()
-    motor_izquierdo = Motor(Port.B)
-    motor_derecho = Motor(Port.C)
 
-    robot = DriveBase(motor_izquierdo, motor_derecho, wheel_diameter=55, axle_track=104)
-    
+    ev3 = EV3Brick()
+    ev3.speaker.beep()
     if posicion == posicion_actual:
         print("Nos quedamos en el lugar")
+        # hub.speaker.beep()   
+        ev3.speaker.beep()
         return True
     elif posicion == 0:
         distancia = posicion - posicion_actual
         print("Volvemos a la posición inicial, retrocedemos:", distancia, "distancia")
-        robot.straight(distancia*200)
+        ev3.speaker.beep()
+        # ev3.speaker.beep()
+        
     else:
         distancia = posicion - posicion_actual
         print("Avanzamos:", distancia, "distancia")
-        robot.straight(distancia*200)
+        ev3.speaker.beep()
+        # ev3.speaker.beep()
+        # ev3.speaker.beep()   
 
+
+'''
+Función de nombre del robot
+'''
+
+def nombre():
+    try:
+            with open('/etc/hostname') as file:
+                lines = file.readlines()
+                for line in lines:
+                    if line.startswith('reina'):
+                        name = line.split()
+    except Exception as e:
+        print(str(e))
+        
+    return name[0]
+
+
+
+whoiam = int(nombre()[5])
 
 '''
 ---------------------------------------------------------------------------------------------------------------
@@ -80,16 +92,22 @@ def calcular_posicion_anterior(posiciones, whoiam):
     mis_posiciones_disponibles = []
     
     if whoiam == len(posiciones) + 1:
-
+        print("Pasamos el if")
+        if len(posiciones) == 0:
+            for i in range(1,5):
+                mis_posiciones_disponibles.append([1, i])
+            return mis_posiciones_disponibles
         for i in range(len(posiciones)):
-            for j in range(1, 9):
+            for j in range(1, 5):
                 if calcular_pendiente(posiciones[i][0], posiciones[i][1], whoiam, j):
-                    # print("Posible posición respecto a la reina", posiciones[i][0], "Posición:", j)
+                    print("Posible posición respecto a la reina", posiciones[i][0], "Posición:", j)
                     mis_posiciones_disponibles.append([whoiam, j])
+        print(mis_posiciones_disponibles)
         mis_posiciones_disponibles = depurar(mis_posiciones_disponibles, len(posiciones))
         print(mis_posiciones_disponibles)
         
         return mis_posiciones_disponibles
+
 
 
 '''
@@ -102,9 +120,9 @@ def calcular_posicion_anterior(posiciones, whoiam):
 ---------------------------------------------------------------------------------------------------------------
 '''
 def posiciones_respecto_actual(disponibles, posicion_actual):
-    
+    # global posicion_actual
     if posicion_actual == 0:
-        # MOVERSE ANTES DE CAMBIAR LA POSICIÓN ANTERIOR        
+        # MOVERSE ANTES DE CAMBIAR LA POSICIÓN ANTERIOR
         moverse_posicion(disponibles[0][1], posicion_actual)
         posicion_actual = disponibles[0][1]
     else:
@@ -174,29 +192,61 @@ def calcular_pendiente(x1, y1, x2, y2):
         return True
     
 
+
+
 def depurar_ingreso_blue(mensaje, whoiam):
     x, y = int(mensaje[1]), int(mensaje[3])
+    # global whoiam
     if whoiam > x:
         posiciones_otras_reinas.append([x,y])
+        posiciones_total.append([x,y])
     else:
         posiciones_total.append([x,y])
-
 '''
 ---------------------------------------------------------------------------------------------------------------
         Forma de llamar a las funciones.
 ---------------------------------------------------------------------------------------------------------------
 '''
-depurar_ingreso_blue('R1P1', whoiam)
-depurar_ingreso_blue('R2P4', whoiam)
-depurar_ingreso_blue('R3P8', whoiam)
-# print("Print reinas anteoriores:", posiciones_otras_reinas)
-posiciones_temporal = calcular_posicion_anterior(posiciones_otras_reinas, whoiam)
-# print("Soy el retorno de calcular_posicion:", posiciones_temporal)
-if posiciones_temporal:
-    posiciones_respecto_actual(posiciones_temporal, posicion_actual)
 
-# Inicializa el ladrillo EV3
-ev3 = EV3Brick()
+# depurar_ingreso_blue('R1P1', whoiam)
+# depurar_ingreso_blue('R2P4', whoiam)
+# print(posiciones_otras_reinas)
+# print(posiciones_total)
+# posiciones_temporal = calcular_posicion_anterior(posiciones_otras_reinas, whoiam)
+# print(posiciones_temporal)
+# if posiciones_temporal:
+#     posiciones_respecto_actual(posiciones_temporal, posicion_actual)
+
+# ev3 = EV3Brick()
+
+
+SERVER = 'reina1'
+client = BluetoothMailboxClient()
+wait(10000)
+client.connect(SERVER)
+
+while True:
+    for i in range(whoiam-1):
+        mbox.wait()
+        if len(mbox.read())==4:
+            depurar_ingreso_blue(mbox.read(),whoiam)
+        else:
+            break
+    
+
+
+    if len(mbox.read())==4:
+        posiciones_temporal = calcular_posicion_anterior(posiciones_otras_reinas, whoiam)
+        if posiciones_temporal:
+            posiciones_respecto_actual(posiciones_temporal, posicion_actual)
+        else:
+            mbox.send('error')
+        
+
+    else:
+        posiciones_temporal = calcular_posicion_anterior(posiciones_otras_reinas, whoiam)
+        posiciones_respecto_actual(posiciones_temporal, posicion_actual)
+
 
 def pantalla(mensaje_coso, i):
     # Mensaje que deseas mostrar en la pantalla
@@ -207,52 +257,40 @@ def pantalla(mensaje_coso, i):
     wait(5000)
     # Limpia la pantalla
     ev3.screen.clear()
-
-def nombre():
-    try:
-            with open('/etc/hostname') as file:
-                lines = file.readlines()
-                for line in lines:
-                    if line.startswith('reina'):
-                        name = line.split()
-    except Exception as e:
-        print(str(e))
-        
-    return name[0]
-
-
-
-# This is the name of the remote EV3 or PC we are connecting to.
-
+    
+    
+# Inicializa el ladrillo EV3
 # ev3 = EV3Brick()
-# motor_izquierdo = Motor(Port.B)
-# motor_derecho = Motor(Port.C)
 
-# robot = DriveBase(motor_izquierdo, motor_derecho, wheel_diameter=55, axle_track=104)
+# server = BluetoothMailboxServer()
 
+# server.wait_for_connection(2)
+# # server.wait_for_connection()
 
-# SERVER = 'reina1'
-
-# client = BluetoothMailboxClient()
-# client.connect(SERVER)
-# mbox = TextMailbox(nombre(), client)
-
-# print('establishing connection...')
+# mbox1 = TextMailbox('reina2', server)
+# mbox2 = TextMailbox('reina3', server)
+# mbox3 = TextMailbox('reina4', server)
+# The server must be started before the client!
+# print('waiting for connection...')
 # print('connected!')
 
-# # In this program, the client sends the first message and then waits for the
-# # server to reply.
 # i = 0
 # while True:
-#     print("Estamos en el while")
-#     mbox.send(nombre())
-#     mbox.wait()
-#     mensaje = mbox.read()
-#     if i == 0:
-#         robot.straight(int(mensaje))
-#     else:
-#         pantalla(mensaje, i)
-#     # print(mbox.read())
-#     # pantalla(mensaje, i)
-#     #break
-#     # i += 1
+#     print("en el while")
+    
+#     if mbox1.read():
+#         mensaje_recibido_cli1 = mbox1.read()
+#         pantalla(mensaje_recibido_cli1, i)
+#         mbox1.send("R"+ str(whoiam) + "P" + str(posicion_actual))
+    
+#     if mbox2.read():
+#         mensaje_recibido_cli2 = mbox2.read()
+#         pantalla(mensaje_recibido_cli2, i)
+#         mbox2.send("R"+ str(whoiam) + "P" + str(posicion_actual))
+    
+#     # if mbox3.read():
+#     #     mensaje_recibido_cli3 = mbox3.read()
+#     #     pantalla(mensaje_recibido_cli3, i)
+#     #     mbox3.send('-200')
+    
+#     i += 1
