@@ -217,18 +217,22 @@ def depurar_ingreso_blue(mensaje, whoiam):
 # if posiciones_temporal:
 #     posiciones_respecto_actual(posiciones_temporal, posicion_actual)
 
-# ev3 = EV3Brick()
+ev3 = EV3Brick()
 
 
 SERVER = 'reina1'
 client = BluetoothMailboxClient()
+mbox = TextMailbox(nombre(), client)
 wait(10000)
 client.connect(SERVER)
+
 
 while True:
     for i in range(whoiam-1):
         mbox.wait()
         if len(mbox.read())==4:
+            pantalla("Recibimos! ", i)
+            # print("Ingreso de información")
             depurar_ingreso_blue(mbox.read(),whoiam)
         else:
             break
@@ -236,10 +240,12 @@ while True:
 
 
     if len(mbox.read())==4:
+        pantalla("Entramos\nal proceso")
         posiciones_temporal = calcular_posicion_anterior(posiciones_otras_reinas, whoiam)
         if posiciones_temporal:
             posiciones_respecto_actual(posiciones_temporal, posicion_actual)
         else:
+            pantalla("ERROR!!")
             mbox.send('error')
         
 

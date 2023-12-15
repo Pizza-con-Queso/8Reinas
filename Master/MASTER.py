@@ -21,18 +21,18 @@ def nombre():
 
 
 
+def pantalla(mensaje_coso):
+    ev3 = EV3Brick()
+    
+    ev3.screen.print(mensaje_coso)
+    
+    wait(5000)
+    
+    ev3.screen.clear()
 
 whoiam = int(nombre()[5])
 
-def pantalla(mensaje_coso):
-    ev3 = EV3Brick
-    # Mensaje que deseas mostrar en la pantalla
-    # mensaje = mensaje_coso + str(i)
-    # Muestra el mensaje en la pantalla
-    ev3.screen.print(mensaje)
-    wait(5000)
-    # Limpia la pantalla
-    ev3.screen.clear()
+pantalla(whoiam)
 
 
 posiciones = []
@@ -43,27 +43,35 @@ def prep_men(posicion_act):
 	mensaje = "r"+str(whoiam)+"p"+str(posicion_act)
 	print(mensaje)
 	posiciones.append(mensaje)
+ 	print("Mensaje ingresado:", posiciones)
 	pantalla(mensaje)
 
 server = BluetoothMailboxServer()
 
-server.wait_for_connection(3)
 
+'''
+Pruebas!!
+'''
+server.wait_for_connection()
 mbox1 = TextMailbox('reina2', server)
+#-----------------------------------------------------#
+# server.wait_for_connection(3)
 
-mbox2 = TextMailbox('reina3', server)
+# mbox1 = TextMailbox('reina2', server)
 
-mbox3 = TextMailbox('reina4', server)
+# mbox2 = TextMailbox('reina3', server)
 
-ev3 = EV3Brick()
+# mbox3 = TextMailbox('reina4', server)
 
-motor_izquierdo = Motor(Port.B)
-motor_derecho = Motor(Port.C)
+# ev3 = EV3Brick()
 
-robot = DriveBase(motor_izquierdo, motor_derecho, wheel_diameter=55, axle_track=104)
+# motor_izquierdo = Motor(Port.B)
+# motor_derecho = Motor(Port.C)
+
+# robot = DriveBase(motor_izquierdo, motor_derecho, wheel_diameter=55, axle_track=104)
 
 def avanzar(num):
-    ev3.screen.print('Hello!')
+    # ev3.screen.print('Hello!')
 	# robot.straight(num)
 	# posicion_act =+ num
 	prep_men(num)
@@ -71,6 +79,7 @@ def avanzar(num):
 def envio(posiciones):
 	for i in range(len(posiciones)):
 		if len(posiciones) == 1:
+      		# print("Enviando ", 1)
 			mbox1.send(posiciones[i])
 		elif len(posiciones) == 2:
 			mbox2.send(posiciones[i]) 
@@ -96,20 +105,20 @@ while True:
 		else:
 			posiciones.pop(0)
 
-	if mbox2.read():
-		if len(mbox2.read()) == 4:
-			posiciones.append(mbox2.read())
-			envio()
-		else:
-			posiciones.pop(1)
-			mbox1.send("error")
+	# if mbox2.read():
+	# 	if len(mbox2.read()) == 4:
+	# 		posiciones.append(mbox2.read())
+	# 		envio()
+	# 	else:
+	# 		posiciones.pop(1)
+	# 		mbox1.send("error")
 
-	if mbox3.read():
-		if len(mbox3.read()) == 4:
-			posiciones.append(mbox3.read())
-			envio()
-		else:
-			posiciones.pop(2)
-			mbox2.send("error")
+	# if mbox3.read():
+	# 	if len(mbox3.read()) == 4:
+	# 		posiciones.append(mbox3.read())
+	# 		envio()
+	# 	else:
+	# 		posiciones.pop(2)
+	# 		mbox2.send("error")
 
 
