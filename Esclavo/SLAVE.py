@@ -9,6 +9,16 @@ from pybricks.robotics import DriveBase
 # from pybricks.hubs import PrimeHub
 
 
+def pantalla(mensaje_coso):
+    ev3 = EV3Brick()
+    
+    ev3.screen.print(mensaje_coso)
+    
+    wait(5000)
+    
+    ev3.screen.clear()
+
+
 '''
 ---------------------------------------------------------------------------------------------------------------
         Variables globales
@@ -37,23 +47,23 @@ posiciones_disp = []
 '''
 def moverse_posicion(posicion, posicion_actual):
 
-    ev3 = EV3Brick()
-    ev3.speaker.beep()
+    # ev3 = EV3Brick()
+    # ev3.speaker.beep()
     if posicion == posicion_actual:
         print("Nos quedamos en el lugar")
         # hub.speaker.beep()   
-        ev3.speaker.beep()
+        # ev3.speaker.beep()
         return True
     elif posicion == 0:
         distancia = posicion - posicion_actual
         print("Volvemos a la posición inicial, retrocedemos:", distancia, "distancia")
-        ev3.speaker.beep()
+        # ev3.speaker.beep()
         # ev3.speaker.beep()
         
     else:
         distancia = posicion - posicion_actual
         print("Avanzamos:", distancia, "distancia")
-        ev3.speaker.beep()
+        # ev3.speaker.beep()
         # ev3.speaker.beep()
         # ev3.speaker.beep()   
 
@@ -229,13 +239,14 @@ client.connect(SERVER)
 
 while True:
     for i in range(whoiam-1):
-        mbox.wait()
-        if len(mbox.read())==4:
-            pantalla("Recibimos! ", i)
-            # print("Ingreso de información")
-            depurar_ingreso_blue(mbox.read(),whoiam)
-        else:
-            break
+        if mbox.wait_new():
+            if len(mbox.read())==4:
+                pantalla("Recibimos! ")
+                # print("Ingreso de información")
+                depurar_ingreso_blue(mbox.read(),whoiam)
+                print(posiciones_otras_reinas)
+            else:
+                break
     
 
 
@@ -243,10 +254,16 @@ while True:
         pantalla("Entramos\nal proceso")
         posiciones_temporal = calcular_posicion_anterior(posiciones_otras_reinas, whoiam)
         if posiciones_temporal:
-            posiciones_respecto_actual(posiciones_temporal, posicion_actual)
+            posicion_actual = posiciones_respecto_actual(posiciones_temporal, posicion_actual)
+            
+            pantalla("r"+str(whoiam)+"p"+str(posicion_actual))
+            mbox.send("r"+str(whoiam)+"p"+str(posicion_actual))
         else:
             pantalla("ERROR!!")
             mbox.send('error')
+    # else:
+    #     pantalla("ERROR!!")
+    #     mbox.send('error')
         
 
     else:
@@ -254,15 +271,15 @@ while True:
         posiciones_respecto_actual(posiciones_temporal, posicion_actual)
 
 
-def pantalla(mensaje_coso, i):
-    # Mensaje que deseas mostrar en la pantalla
-    mensaje = mensaje_coso + str(i)
+# def pantalla(mensaje_coso, i):
+#     # Mensaje que deseas mostrar en la pantalla
+#     mensaje = mensaje_coso + str(i)
 
-    # Muestra el mensaje en la pantalla
-    ev3.screen.print(mensaje)
-    wait(5000)
-    # Limpia la pantalla
-    ev3.screen.clear()
+#     # Muestra el mensaje en la pantalla
+#     ev3.screen.print(mensaje)
+#     wait(5000)
+#     # Limpia la pantalla
+#     ev3.screen.clear()
     
     
 # Inicializa el ladrillo EV3

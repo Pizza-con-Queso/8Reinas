@@ -52,8 +52,11 @@ server = BluetoothMailboxServer()
 '''
 Pruebas!!
 '''
-server.wait_for_connection()
+server.wait_for_connection(2)
 mbox1 = TextMailbox('reina2', server)
+mbox2 = TextMailbox('reina3', server)
+pantalla("Conectados")
+
 #-----------------------------------------------------#
 # server.wait_for_connection(3)
 
@@ -81,16 +84,22 @@ def envio(posiciones):
 		if len(posiciones) == 1:
       		# print("Enviando ", 1)
 			mbox1.send(posiciones[i])
+			pantalla("Enviamos: " + posiciones[i])
+			wait(5000)
 		elif len(posiciones) == 2:
 			mbox2.send(posiciones[i]) 
-		elif len(posiciones) == 3:
-			mbox3.send(posiciones[i])
+			pantalla("Enviamos: " + posiciones[i])
+			wait(5000)
+		# elif len(posiciones) == 3:
+		# 	mbox3.send(posiciones[i])
 		elif len(posiciones) == 4:
 			# beep
 			pass
 
 while True:
-
+	# mbox1.wait()
+	# mbox2.wait()
+	# mbox3.wait()
 	if len(posiciones) == 0:
     	# print("Primer if")
 		avanzar(1)
@@ -98,20 +107,22 @@ while True:
 		envio(posiciones)
 		# print("Envio")
 	
-	if mbox1.read(): # 
+	if mbox1.wait_new(): # 
 		if len(mbox1.read()) == 4:
+			pantalla("Recibimos R1 " + mbox1.read())
 			posiciones.append(mbox1.read())
-			envio()
+			envio(posiciones)
 		else:
 			posiciones.pop(0)
 
-	# if mbox2.read():
-	# 	if len(mbox2.read()) == 4:
-	# 		posiciones.append(mbox2.read())
-	# 		envio()
-	# 	else:
-	# 		posiciones.pop(1)
-	# 		mbox1.send("error")
+	if mbox2.wait_new():
+		if len(mbox2.read()) == 4:
+			pantalla("Recibimos R2")
+			posiciones.append(mbox2.read())
+			envio(posiciones)
+		else:
+			posiciones.pop(1)
+			mbox1.send("error")
 
 	# if mbox3.read():
 	# 	if len(mbox3.read()) == 4:
