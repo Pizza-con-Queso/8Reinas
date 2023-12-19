@@ -52,21 +52,15 @@ server = BluetoothMailboxServer()
 '''
 Pruebas!!
 '''
-server.wait_for_connection(2)
+server.wait_for_connection(3)
 mbox1 = TextMailbox('reina2', server)
 mbox2 = TextMailbox('reina3', server)
+mbox3 = TextMailbox('reina4', server)
 pantalla("Conectados")
 
 #-----------------------------------------------------#
-# server.wait_for_connection(3)
 
-# mbox1 = TextMailbox('reina2', server)
-
-# mbox2 = TextMailbox('reina3', server)
-
-# mbox3 = TextMailbox('reina4', server)
-
-# ev3 = EV3Brick()
+ev3 = EV3Brick()
 
 # motor_izquierdo = Motor(Port.B)
 # motor_derecho = Motor(Port.C)
@@ -90,10 +84,12 @@ def envio(posiciones):
 			mbox2.send(posiciones[i]) 
 			pantalla("Enviamos: " + posiciones[i])
 			wait(5000)
-		# elif len(posiciones) == 3:
-		# 	mbox3.send(posiciones[i])
+		elif len(posiciones) == 3:
+		 	mbox3.send(posiciones[i])
+			pantalla("Enviamos: " + posiciones[i])
+			wait(5000)
 		elif len(posiciones) == 4:
-			# beep
+			ev3.play_notes(['C','C','D','D'])
 			pass
 
 while True:
@@ -107,23 +103,38 @@ while True:
 		envio(posiciones)
 		# print("Envio")
 	
-	if mbox1.wait_new(): # 
+	elif mbox1.wait_new(): # 
+		print(mbox1.read())
+		pantalla("Recibimos R1 " + mbox1.read())
 		if len(mbox1.read()) == 4:
-			pantalla("Recibimos R1 " + mbox1.read())
+			#pantalla("Recibimos R1 " + mbox1.read())
 			posiciones.append(mbox1.read())
 			envio(posiciones)
 		else:
 			posiciones.pop(0)
-
-	if mbox2.wait_new():
+	
+	elif mbox2.wait_new():
+		print(mbox2.read())
+		pantalla(mbox2.read())
 		if len(mbox2.read()) == 4:
 			pantalla("Recibimos R2")
 			posiciones.append(mbox2.read())
 			envio(posiciones)
 		else:
 			posiciones.pop(1)
+			pantalla('ErrordePos')
 			mbox1.send("error")
 
+	elif mbox3.wait_new():
+		if len(mbox3.read()) == 4:
+			pantalla("Recibimos R3")
+			posiciones.append(mbox3.read())
+			envio(posiciones)
+		else:
+			posiciones.pop(2)
+			mbox2.send("error")
+
+	print('ciclo')
 	# if mbox3.read():
 	# 	if len(mbox3.read()) == 4:
 	# 		posiciones.append(mbox3.read())
