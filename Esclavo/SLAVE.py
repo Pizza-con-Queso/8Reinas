@@ -239,6 +239,7 @@ client.connect(SERVER)
 
 
 while True:
+
     for i in range(whoiam-1):
         if mbox.wait_new():
             if len(mbox.read())==4:
@@ -262,6 +263,7 @@ while True:
         else:
             pantalla("ERROR!!\n(UltPos)")
             mbox.send('error')
+            posiciones_otras_reinas = []
     # else:
     #     pantalla("ERROR!!")
     #     mbox.send('error')
@@ -269,14 +271,23 @@ while True:
 
     else:
         posiciones_temporal = calcular_posicion_anterior(posiciones_otras_reinas, whoiam)
+        
         if posiciones_temporal:
             posicion_actual = posiciones_respecto_actual(posiciones_temporal, posicion_actual)
-            pantalla("r"+str(whoiam)+"p"+str(posicion_actual))
-            wait(5000)
-            mbox.send("r"+str(whoiam)+"p"+str(posicion_actual))
+            if posicion_actual == 0:
+                pantalla("ERROR\nNoMasPosiciones")
+                mbox.send('error')
+                posiciones_otras_reinas = []
+            
+            else:
+                pantalla("r"+str(whoiam)+"p"+str(posicion_actual))
+                wait(5000)
+                mbox.send("r"+str(whoiam)+"p"+str(posicion_actual))
         else:
             pantalla("ERROR!!\n(ErrorCadena)")
             mbox.send('error')
+            posiciones_otras_reinas = []
+
 
 
 
