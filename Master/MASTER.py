@@ -32,7 +32,7 @@ def pantalla(mensaje_coso):
 
 whoiam = int(nombre()[5])
 
-pantalla(whoiam)
+# pantalla(whoiam)
 
 
 posiciones = []
@@ -76,15 +76,17 @@ def avanzar(num):
 def envio(posiciones):
 	for i in range(len(posiciones)):
 		if len(posiciones) == 1:
-      		# print("Enviando ", 1)
+			print("Enviando R2")
 			mbox1.send(posiciones[i])
 			pantalla("Enviamos: " + posiciones[i])
 			wait(5000)
 		elif len(posiciones) == 2:
+			print("Enviando R3")
 			mbox2.send(posiciones[i]) 
 			pantalla("Enviamos: " + posiciones[i])
 			wait(5000)
 		elif len(posiciones) == 3:
+			print("Enviando R4")
 		 	mbox3.send(posiciones[i])
 			pantalla("Enviamos: " + posiciones[i])
 			wait(5000)
@@ -93,54 +95,49 @@ def envio(posiciones):
 			pass
 
 while True:
-	# mbox1.wait()
-	# mbox2.wait()
-	# mbox3.wait()
-	if len(posiciones) == 0:
-    	# print("Primer if")
-		avanzar(1)
-		# print("Avance")
-		envio(posiciones)
-		# print("Envio")
-	
-	elif mbox1.wait_new(): # 
-		print(mbox1.read())
-		pantalla("Recibimos R1 " + mbox1.read())
-		if len(mbox1.read()) == 4:
-			#pantalla("Recibimos R1 " + mbox1.read())
-			posiciones.append(mbox1.read())
-			envio(posiciones)
-		else:
-			posiciones.pop(0)
-	
-	elif mbox2.wait_new():
-		print(mbox2.read())
-		pantalla(mbox2.read())
-		if len(mbox2.read()) == 4:
-			pantalla("Recibimos R2")
-			posiciones.append(mbox2.read())
-			envio(posiciones)
-		else:
-			posiciones.pop(1)
-			pantalla('ErrordePos')
-			mbox1.send("error")
-
-	elif mbox3.wait_new():
-		if len(mbox3.read()) == 4:
-			pantalla("Recibimos R3")
-			posiciones.append(mbox3.read())
-			envio(posiciones)
-		else:
-			posiciones.pop(2)
-			mbox2.send("error")
-
-	print('ciclo')
-	# if mbox3.read():
-	# 	if len(mbox3.read()) == 4:
-	# 		posiciones.append(mbox3.read())
-	# 		envio()
-	# 	else:
-	# 		posiciones.pop(2)
-	# 		mbox2.send("error")
+    if len(posiciones) == 0:
+        avanzar(1)
+        pantalla("Envio")
+        envio(posiciones)
+        
+        pantalla("L 100")
+        
+    if mbox1.wait_new():
+        mensaje1 = mbox1.read()
+        print("Mensaje R2: ", mensaje1)
+        pantalla("Recibimos R1 " + mensaje1)
+        
+        if len(mensaje1) == 4:
+            pantalla("Recibimos R1\n" + mensaje1)
+            posiciones.append(mensaje1)
+            envio(posiciones)
+        else:
+            posiciones.pop(0)
+            pantalla("Linea 112")
+    if mbox2.wait_new():
+        mensaje2 = mbox2.read()
+        print("Mensaje R3: ", mensaje2)
+        pantalla(mensaje2)
+        
+        if len(mensaje2) == 4:
+            pantalla("Recibimos R2\n"+ mensaje2)
+            posiciones.append(mensaje2)
+            envio(posiciones)
+        else:
+            posiciones.pop(1)
+            pantalla('ErrordePos')
+            mbox1.send("error")
+    pantalla("Linea 126")
+    if mbox3.wait_new():
+        mensaje3 = mbox3.read()
+        print("Mensaje R4: ", mensaje3)
+        
+        if len(mensaje3) == 4:
+            pantalla("Recibimos R3\n" + mensaje3)
+            posiciones.append(mensaje3)
+            envio(posiciones)
+        else:
+            posiciones.pop(2)
+            mbox2.send("error")
 
 

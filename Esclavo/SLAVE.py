@@ -229,6 +229,7 @@ def depurar_ingreso_blue(mensaje, whoiam):
 
 ev3 = EV3Brick()
 
+posiciones_temporal = []
 
 SERVER = 'reina1'
 client = BluetoothMailboxClient()
@@ -259,7 +260,7 @@ while True:
             pantalla("r"+str(whoiam)+"p"+str(posicion_actual))
             mbox.send("r"+str(whoiam)+"p"+str(posicion_actual))
         else:
-            pantalla("ERROR!!")
+            pantalla("ERROR!!\n(UltPos)")
             mbox.send('error')
     # else:
     #     pantalla("ERROR!!")
@@ -268,7 +269,16 @@ while True:
 
     else:
         posiciones_temporal = calcular_posicion_anterior(posiciones_otras_reinas, whoiam)
-        posiciones_respecto_actual(posiciones_temporal, posicion_actual)
+        if posiciones_temporal:
+            posicion_actual = posiciones_respecto_actual(posiciones_temporal, posicion_actual)
+            pantalla("r"+str(whoiam)+"p"+str(posicion_actual))
+            wait(5000)
+            mbox.send("r"+str(whoiam)+"p"+str(posicion_actual))
+        else:
+            pantalla("ERROR!!\n(ErrorCadena)")
+            mbox.send('error')
+
+
 
 
 # def pantalla(mensaje_coso, i):
