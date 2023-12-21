@@ -14,7 +14,7 @@ def pantalla(mensaje_coso):
     
     ev3.screen.print(mensaje_coso)
     
-    wait(5000)
+    wait(4000)
     
     ev3.screen.clear()
 
@@ -239,16 +239,17 @@ client.connect(SERVER)
 
 
 while True:
-
+    print('ciclo')
     for i in range(whoiam-1):
-        if mbox.wait_new():
-            if len(mbox.read())==4:
-                pantalla("Recibimos! ")
-                # print("Ingreso de información")
-                depurar_ingreso_blue(mbox.read(),whoiam)
-                print(posiciones_otras_reinas)
-            else:
-                break
+        print('esperando mensaje')
+        mbox.wait()
+        if len(mbox.read())==4:
+            pantalla("Recibimos! ")
+            # print("Ingreso de información")
+            depurar_ingreso_blue(mbox.read(),whoiam)
+            print(posiciones_otras_reinas)
+        else:
+            break
     
 
 
@@ -269,6 +270,9 @@ while True:
     #     mbox.send('error')
         
 
+    elif mbox.read() == 'exito':
+        break
+    
     else:
         posiciones_temporal = calcular_posicion_anterior(posiciones_otras_reinas, whoiam)
         
@@ -287,54 +291,3 @@ while True:
             pantalla("ERROR!!\n(ErrorCadena)")
             mbox.send('error')
             posiciones_otras_reinas = []
-
-
-
-
-
-# def pantalla(mensaje_coso, i):
-#     # Mensaje que deseas mostrar en la pantalla
-#     mensaje = mensaje_coso + str(i)
-
-#     # Muestra el mensaje en la pantalla
-#     ev3.screen.print(mensaje)
-#     wait(5000)
-#     # Limpia la pantalla
-#     ev3.screen.clear()
-    
-    
-# Inicializa el ladrillo EV3
-# ev3 = EV3Brick()
-
-# server = BluetoothMailboxServer()
-
-# server.wait_for_connection(2)
-# # server.wait_for_connection()
-
-# mbox1 = TextMailbox('reina2', server)
-# mbox2 = TextMailbox('reina3', server)
-# mbox3 = TextMailbox('reina4', server)
-# The server must be started before the client!
-# print('waiting for connection...')
-# print('connected!')
-
-# i = 0
-# while True:
-#     print("en el while")
-    
-#     if mbox1.read():
-#         mensaje_recibido_cli1 = mbox1.read()
-#         pantalla(mensaje_recibido_cli1, i)
-#         mbox1.send("R"+ str(whoiam) + "P" + str(posicion_actual))
-    
-#     if mbox2.read():
-#         mensaje_recibido_cli2 = mbox2.read()
-#         pantalla(mensaje_recibido_cli2, i)
-#         mbox2.send("R"+ str(whoiam) + "P" + str(posicion_actual))
-    
-#     # if mbox3.read():
-#     #     mensaje_recibido_cli3 = mbox3.read()
-#     #     pantalla(mensaje_recibido_cli3, i)
-#     #     mbox3.send('-200')
-    
-#     i += 1

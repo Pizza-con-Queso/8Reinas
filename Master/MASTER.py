@@ -26,18 +26,17 @@ def pantalla(mensaje_coso):
     
     ev3.screen.print(mensaje_coso)
     
-    wait(5000)
+    wait(4000)
     
     ev3.screen.clear()
 
 whoiam = int(nombre()[5])
 
-pantalla(whoiam)
-
 
 posiciones = []
 
-posicion_act = 0
+posicion_act = int(0)
+
 ult_reina_com = 0
 
 def prep_men(posicion_act):
@@ -68,13 +67,15 @@ ev3 = EV3Brick()
 
 # robot = DriveBase(motor_izquierdo, motor_derecho, wheel_diameter=55, axle_track=104)
 
-def avanzar(num):
+def avanzar(posicion_act):
     # ev3.screen.print('Hello!')
 	# robot.straight(num)
-	posicion_act =+ num
+	posicion_act = posicion_act + 1
 	prep_men(posicion_act)
+	return posicion_act
 	
 def envio(posiciones):
+	ev3 = EV3Brick()
 	for i in range(len(posiciones)):
 		if len(posiciones) == 1:
       		# print("Enviando ", 1)
@@ -90,57 +91,65 @@ def envio(posiciones):
 			pantalla("Enviamos: " + posiciones[i])
 			wait(5000)
 		elif len(posiciones) == 4:
-			ev3.play_notes(['C','C','D','D'])
+			ev3.speaker.beep()
 			pass
 
 while True:
-	# mbox1.wait()
-	# mbox2.wait()
-	# mbox3.wait()
+
 	if len(posiciones) == 0:
-    	# print("Primer if")
-		avanzar(1)
-		# print("Avance")
+		if posicion_act == 4:
+			mbox1.send('exito')
+			mbox2.send('exito')
+			mbox3.send('exito')
+			break
+		posicion_act = avanzar(posicion_act)
 		envio(posiciones)
 		ult_reina_com = 1
-		# print("Envio")
 	
 	if ult_reina_com == 1: #
-		mbox1.wait_new() 
-		print(mbox1.read())
+		print('esperando mensaje r2')
+		mbox1.wait()
+		print('mensaje recibido r2')
+		print('mensaje de la reina 2: '+ mbox1.read())
 		pantalla("Recibimos R2 " + mbox1.read())
 		if len(mbox1.read()) == 4:
-			#pantalla("Recibimos R1 " + mbox1.read())
 			posiciones.append(mbox1.read())
-			envio(posiciones)
+			envio(posiciones) # envio a la siguiente reina
 			ult_reina_com = 2
 		else:
-			posiciones.pop(0)
+			posiciones.pop(-1)
 			ult_reina_com = 0
 	
 	if ult_reina_com == 2:
-		mbox2.wait_new() 
-		print(mbox2.read())
+		print('esperando mensaje r3')
+		mbox2.wait()
+		print('mensaje recibido r3')
+		print('mensaje de la reina 3: '+mbox2.read())
 		pantalla(mbox2.read())
 		if len(mbox2.read()) == 4:
 			pantalla("Recibimos R3")
 			posiciones.append(mbox2.read())
-			envio(posiciones)
+			envio(posiciones)# envio a la siguiente reina
 			ult_reina_com = 3
 		else:
-			posiciones.pop(1)
-			pantalla('ErrordePos')
+			posiciones.pop(-1)
 			mbox1.send("error")
+			print('mensaje error enviado a reina 2')
 			ult_reina_com = 1
 
 	if ult_reina_com == 3:
-		mbox3.wait_new() 
+		print('esperando mensaje r4')
+		mbox3.wait() 
+		print('mensaje de la reina 4: '+mbox3.read())
+		print('mensaje recibido r4')
 		if len(mbox3.read()) == 4:
 			pantalla("Recibimos R4")
 			posiciones.append(mbox3.read())
-			envio(posiciones)
-			ult_reina_com = 0
+			envio(posiciones)# beep
+			posiciones.pop(-1)
+			mbox3.send('avanza')
 		else:
-			posiciones.pop(2)
+			posiciones.pop(-1)
 			mbox2.send("error")
+			print('mensaje error enviado a reina 3')
 			ult_reina_com = 2
