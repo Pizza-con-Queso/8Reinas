@@ -7,6 +7,11 @@ from pybricks.ev3devices import Motor
 
 from pybricks.messaging import BluetoothMailboxServer, TextMailbox
 
+motor_izquierdo = Motor(Port.B)
+motor_derecho = Motor(Port.C)
+robot = DriveBase(motor_izquierdo, motor_derecho, wheel_diameter=55, axle_track=104)
+robot.settings(straight_speed=40)
+
 def nombre():
     try:
             with open('/etc/hostname') as file:
@@ -62,14 +67,8 @@ pantalla("Conectados")
 
 ev3 = EV3Brick()
 
-# motor_izquierdo = Motor(Port.B)
-# motor_derecho = Motor(Port.C)
-
-# robot = DriveBase(motor_izquierdo, motor_derecho, wheel_diameter=55, axle_track=104)
-
 def avanzar(posicion_act):
-    # ev3.screen.print('Hello!')
-	# robot.straight(num)
+	robot.straight(200)
 	posicion_act = posicion_act + 1
 	prep_men(posicion_act)
 	return posicion_act
@@ -101,6 +100,7 @@ while True:
 			mbox1.send('exito')
 			mbox2.send('exito')
 			mbox3.send('exito')
+			robot.straight(-800)
 			break
 		posicion_act = avanzar(posicion_act)
 		envio(posiciones)

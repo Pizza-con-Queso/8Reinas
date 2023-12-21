@@ -5,8 +5,7 @@ from pybricks.tools import wait
 from pybricks.parameters import Port, Stop, Direction, Button, Color
 from pybricks.tools import wait, StopWatch, DataLog
 from pybricks.robotics import DriveBase
-
-# from pybricks.hubs import PrimeHub
+from pybricks.ev3devices import Motor
 
 
 def pantalla(mensaje_coso):
@@ -36,6 +35,11 @@ posicion_actual = 0
 posiciones_otras_reinas = [] # Input: [número del robot, número de la posición]
 posiciones_total = []
 posiciones_disp = []
+
+motor_izquierdo = Motor(Port.B)
+motor_derecho = Motor(Port.C)
+robot = DriveBase(motor_izquierdo, motor_derecho, wheel_diameter=55, axle_track=104)
+robot.settings(straight_speed=40)
 '''
 ---------------------------------------------------------------------------------------------------------------
         Función que permite determinar la distancia que debe moverse el robot por cada uno de los resultados.
@@ -57,12 +61,14 @@ def moverse_posicion(posicion, posicion_actual):
     elif posicion == 0:
         distancia = posicion - posicion_actual
         print("Volvemos a la posición inicial, retrocedemos:", distancia, "distancia")
+        robot.straight(distancia * 200)
         # ev3.speaker.beep()
         # ev3.speaker.beep()
         
     else:
         distancia = posicion - posicion_actual
         print("Avanzamos:", distancia, "distancia")
+        robot.straight(distancia * 200)
         # ev3.speaker.beep()
         # ev3.speaker.beep()
         # ev3.speaker.beep()   
